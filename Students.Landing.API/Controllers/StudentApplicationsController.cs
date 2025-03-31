@@ -28,7 +28,7 @@ namespace Students.Landing.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var item = await _service.GetByIdAsync(id);
+            var item = await _service.GetByIdAsync(id); 
             if (item == null) return NotFound();
             return Ok(item);
         }
@@ -47,19 +47,6 @@ namespace Students.Landing.API.Controllers
             }
         }
 
-        //[HttpGet("pending/university/{universityId}")]
-        //public async Task<IActionResult> GetPendingApplicationsForUniversity(Guid universityId)
-        //{
-        //    var applications = await _service.GetPendingApplicationsForUniversity(universityId);
-        //    return Ok(applications);
-        //}
-
-        //[HttpGet("pending/company/{companyId}")]
-        //public async Task<IActionResult> GetPendingApplicationsForCompany(Guid companyId)
-        //{
-        //    var applications = await _service.GetPendingApplicationsForCompany(companyId);
-        //    return Ok(applications);
-        //}
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] StudentApplication model)
@@ -68,40 +55,5 @@ namespace Students.Landing.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        //[HttpPost("{applicationId:guid}/approveUniversity")]
-        //public async Task<IActionResult> ApproveByUniversity(Guid applicationId)
-        //{
-        //    return Ok(await _service.ApproveByUniversity(applicationId));
-        //}
-
-        //[HttpPost("{applicationId:guid}/rejectUniversity")]
-        //public async Task<IActionResult> RejectByUniversity(Guid applicationId)
-        //{
-        //    return Ok(await _service.RejectByUniversity(applicationId));
-        //}
-
-        //[HttpPost("{applicationId:guid}/acceptCompany")]
-        //public async Task<IActionResult> AcceptByCompany(Guid applicationId)
-        //{
-        //    return Ok(await _service.AcceptByCompany(applicationId));
-        //}
-
-        //[HttpPost("{applicationId:guid}/rejectCompany")]
-        //public async Task<IActionResult> RejectByCompany(Guid applicationId)
-        //{
-        //    return Ok(await _service.RejectByCompany(applicationId));
-        //}
-
-        //[HttpPost("{applicationId:guid}/complete")]
-        //public async Task<IActionResult> MarkAsCompleted(Guid applicationId)
-        //{
-        //    return Ok(await _service.MarkAsCompleted(applicationId));
-        //}
-
-        //[HttpPost("{applicationId:guid}/cancel")]
-        //public async Task<IActionResult> CancelApplication(Guid applicationId)
-        //{
-        //    return Ok(await _service.CancelApplication(applicationId));
-        //}
     }
 }

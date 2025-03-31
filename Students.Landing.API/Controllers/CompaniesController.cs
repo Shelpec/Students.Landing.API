@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Students.Landing.Core.Interfaces;
 using Students.Landing.Core.Models;
@@ -18,6 +19,7 @@ namespace Students.Landing.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var list = await _service.GetAllAsync();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Students.Landing.Core.Interfaces;
 using Students.Landing.Core.Models;
@@ -35,7 +36,7 @@ namespace Students.Landing.Core.Services
 
             existing.FirstName = entity.FirstName;
             existing.LastName = entity.LastName;
-            
+
             existing.MajorId = entity.MajorId;
             existing.PhotoUrl = entity.PhotoUrl;
             existing.KeycloakUserId = entity.KeycloakUserId;
@@ -53,6 +54,16 @@ namespace Students.Landing.Core.Services
             _repo.Delete(existing);
             await _repo.SaveAsync();
             return true;
+        }
+
+        //Реализация нового метода для поиска по KeycloakUserId
+        public async Task<Student?> GetStudentByKeycloakIdAsync(string keycloakUserId)
+        {
+            // Здесь можно оптимизировать, если в репозитории есть метод, позволяющий
+            // фильтровать напрямую в БД. К примеру: _repo.Query().FirstOrDefaultAsync(...).
+            // Пока для наглядности используем GetAllAsync():
+            var allStudents = await _repo.GetAllAsync();
+            return allStudents.FirstOrDefault(s => s.KeycloakUserId == keycloakUserId);
         }
     }
 }

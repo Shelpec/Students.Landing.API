@@ -13,5 +13,7 @@ namespace Students.Landing.Core.Interfaces
         Task<Student> CreateAsync(Student entity);
         Task<Student?> UpdateAsync(Guid id, Student entity);
         Task<bool> DeleteAsync(Guid id);
+
+        Task<Student?> GetStudentByKeycloakIdAsync(string keycloakUserId);
     }
 }

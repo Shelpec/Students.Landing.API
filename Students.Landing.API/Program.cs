@@ -1,23 +1,25 @@
-using Microsoft.EntityFrameworkCore;
+п»їusing Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Students.Landing.Core.Data;
 using Students.Landing.Core.Interfaces;
 using Students.Landing.Core.Services;
 using Students.Landing.Infrastructure.Repositories;
-using System;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Регистрируем DbContext с нашей строкой подключения
+// 1) РџРѕРґРєР»СЋС‡РµРЅРёРµ Рє PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Регистрация репозиториев
+// 2) Р РµРіРёСЃС‚СЂР°С†РёСЏ СЂРµРїРѕР·РёС‚РѕСЂРёРµРІ
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IStudentApplicationRepository, StudentApplicationRepository>();
 builder.Services.AddScoped<IUniversityRepository, UniversityRepository>();
 
-// Регистрация сервисов
+// 3) Р РµРіРёСЃС‚СЂР°С†РёСЏ СЃРµСЂРІРёСЃРѕРІ
 builder.Services.AddScoped<ICompanyDirectionService, CompanyDirectionService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
@@ -27,30 +29,110 @@ builder.Services.AddScoped<IStudentApplicationService, StudentApplicationService
 builder.Services.AddScoped<IMajorService, MajorService>();
 builder.Services.AddScoped<IUniversityMajorService, UniversityMajorService>();
 
-// Подключение контроллеров с настройками JSON
+// 4) Р”РѕР±Р°РІР»СЏРµРј РєРѕРЅС‚СЂРѕР»Р»РµСЂС‹ + РЅР°СЃС‚СЂРѕР№РєРё JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.WriteIndented = true; // Для красивого форматирования
+        options.JsonSerializerOptions.WriteIndented = true;
     });
 
-// Контроллеры и Swagger
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// 5) РќР°СЃС‚СЂРѕР№РєР° Keycloak
+var keycloakSettings = builder.Configuration.GetSection("Keycloak");
+string realm = keycloakSettings["Realm"] ?? "Google-Auth";
+string authority = $"https://kc.umto.kz/realms/{realm}";
+string audience = keycloakSettings["ClientId"] ?? "students-admin-api";
 
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"https://kc.umto.kz/realms/{realm}";
+        options.RequireHttpsMetadata = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = authority,
+            ValidateAudience = false, // <=== Р­РўРћ РћРўРљР›Р®Р§Р
+            ValidateLifetime = true,
+            NameClaimType = ClaimTypes.Name,
+            RoleClaimType = ClaimTypes.Role
+        };
+    });
+
+
+// 7) Swagger СЃ JWT
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentsBook API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Р’РІРµРґРёС‚Рµ С‚РѕРєРµРЅ РІ С„РѕСЂРјР°С‚Рµ: Bearer {Р’РђРЁ_РўРћРљР•Рќ}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" },
+                Scheme = "Bearer",
+                Name = "Authorization",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
+
+// 8) HttpClientFactory
+builder.Services.AddHttpClient();
+
+// === NEW: CORS =====================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+
+// ===================================
+
+// РЎРѕР±РёСЂР°РµРј РїСЂРёР»РѕР¶РµРЅРёРµ
 var app = builder.Build();
 
+// Swagger (С‚РѕР»СЊРєРѕ РІ DEV)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => {
+    app.UseSwaggerUI(c =>
+    {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudentsBook API v1");
         c.RoutePrefix = string.Empty;
     });
 }
 
+// Middleware
 app.UseHttpsRedirection();
+
+// РџРѕРґРєР»СЋС‡Р°РµРј CORS
+app.UseCors("AllowAngular");
+
+// Р’РђР–РќРћ: РїРѕСЂСЏРґРѕРє Auth -> Controllers
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();
