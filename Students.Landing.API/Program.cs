@@ -16,18 +16,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // 2) Регистрация репозиториев
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IStudentApplicationRepository, StudentApplicationRepository>();
-builder.Services.AddScoped<IUniversityRepository, UniversityRepository>();
+builder.Services.AddScoped<IInstitutionRepository, InstitutionRepository>();
 
 // 3) Регистрация сервисов
-builder.Services.AddScoped<ICompanyDirectionService, CompanyDirectionService>();
-builder.Services.AddScoped<ICompanyService, CompanyService>();
-builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<IUniversityService, UniversityService>();
-builder.Services.AddScoped<ISpecializationDirectionService, SpecializationDirectionService>();
-builder.Services.AddScoped<IStudentApplicationService, StudentApplicationService>();
+builder.Services.AddScoped<IOrganisationPracticeFieldService, OrganisationPracticeFieldService>();
+builder.Services.AddScoped<IOrganisationService, OrganisationService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IInstitutionService, InstitutionService>();
+builder.Services.AddScoped<IPracticeFieldService, PracticeFieldService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IMajorService, MajorService>();
-builder.Services.AddScoped<IUniversityMajorService, UniversityMajorService>();
+builder.Services.AddScoped<IInstitutionMajorService, InstitutionMajorService>();
 
 // 4) Добавляем контроллеры + настройки JSON
 builder.Services.AddControllers()

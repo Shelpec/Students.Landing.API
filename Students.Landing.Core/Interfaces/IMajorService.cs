@@ -10,8 +10,8 @@ namespace Students.Landing.Core.Interfaces
     {
         Task<Major?> GetByIdAsync(Guid id);
         Task<IEnumerable<Major>> GetAllAsync();
-        Task<Major> CreateOrAssignMajorToUniversity(Major entity, Guid universityId);
-        Task<Major?> UpdateAsync(Guid id, Major entity, Guid universityId);
+        Task<Major> CreateOrAssignMajorToUniversity(Major entity, Guid institutionId);
+        Task<Major?> UpdateAsync(Guid id, Major entity, Guid institutionId);
         Task<bool> DeleteAsync(Guid id);
     }
 }
