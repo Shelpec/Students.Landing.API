@@ -1,18 +1,26 @@
-﻿using System;
+﻿using Students.Landing.Core.Interfaces;
+using Students.Landing.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Students.Landing.Core.Interfaces;
-using Students.Landing.Core.Models;
 
 namespace Students.Landing.Core.Services
 {
     public class OrganisationPracticeFieldService : IOrganisationPracticeFieldService
     {
         private readonly IGenericRepository<OrganisationPracticeField> _repo;
+        private readonly IGenericRepository<Major> _majorRepo;
+        private readonly IOrganisationPracticeFieldRepository _orgPracticeFieldRepo; // <=== Новый репозиторий
 
-        public OrganisationPracticeFieldService(IGenericRepository<OrganisationPracticeField> repo)
+        public OrganisationPracticeFieldService(
+            IGenericRepository<OrganisationPracticeField> repo,
+            IGenericRepository<Major> majorRepo,
+            IOrganisationPracticeFieldRepository orgPracticeFieldRepo // <=== Добавляем в конструктор
+        )
         {
             _repo = repo;
+            _majorRepo = majorRepo;
+            _orgPracticeFieldRepo = orgPracticeFieldRepo;
         }
 
         public async Task<OrganisationPracticeField?> GetByIdAsync(Guid id)
@@ -51,6 +59,12 @@ namespace Students.Landing.Core.Services
             _repo.Delete(existing);
             await _repo.SaveAsync();
             return true;
+        }
+
+        // ➕ Новый метод через репозиторий
+        public async Task<IEnumerable<OrganisationPracticeField>> GetOrgFieldsByMajorAsync(Guid majorId)
+        {
+            return await _orgPracticeFieldRepo.GetOrgFieldsByMajorAsync(majorId);
         }
     }
 }

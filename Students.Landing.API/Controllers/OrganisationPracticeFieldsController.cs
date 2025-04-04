@@ -54,5 +54,12 @@ namespace Students.Landing.API.Controllers
             if (!success) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("byMajor/{majorId:guid}")]
+        public async Task<IActionResult> GetByMajor(Guid majorId)
+        {
+            var result = await _service.GetOrgFieldsByMajorAsync(majorId);
+            return Ok(result);
+        }
     }
 }

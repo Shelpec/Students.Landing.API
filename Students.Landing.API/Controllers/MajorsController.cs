@@ -33,30 +33,30 @@ namespace Students.Landing.API.Controllers
             return Ok(item);
         }
 
-        /// <summary>
-        /// Создать специальность и привязать её к университету
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> CreateOrAssignMajorToUniversity([FromBody] MajorDTO model)
-        {
-            if (model == null) return BadRequest("Invalid data");
+        ///// <summary>
+        ///// Создать специальность и привязать её к университету
+        ///// </summary>
+        //[HttpPost]
+        //public async Task<IActionResult> CreateOrAssignMajorToUniversity([FromBody] MajorDTO model)
+        //{
+        //    if (model == null) return BadRequest("Invalid data");
 
-            var newMajor = new Major
-            {
-                Name = model.Name,
-                SpecializationDirectionId = model.SpecializationDirectionId
-            };
+        //    var newMajor = new Major
+        //    {
+        //        Name = model.Name,
+        //        SpecializationDirectionId = model.SpecializationDirectionId
+        //    };
 
-            try
-            {
-                var created = await _service.CreateOrAssignMajorToUniversity(newMajor, model.UniversityId);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        //    try
+        //    {
+        //        var created = await _service.CreateOrAssignMajorToUniversity(newMajor, model.UniversityId);
+        //        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
 
 
         [HttpDelete("{id:guid}")]
@@ -66,5 +66,13 @@ namespace Students.Landing.API.Controllers
             if (!success) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("byInstitution/{institutionId:guid}")]
+        public async Task<IActionResult> GetByInstitutionId(Guid institutionId)
+        {
+            var majors = await _service.GetByInstitutionIdAsync(institutionId);
+            return Ok(majors);
+        }
+
     }
 }

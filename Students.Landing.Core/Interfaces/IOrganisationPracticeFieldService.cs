@@ -13,5 +13,6 @@ namespace Students.Landing.Core.Interfaces
         Task<OrganisationPracticeField> CreateAsync(OrganisationPracticeField entity);
         Task<OrganisationPracticeField?> UpdateAsync(Guid id, OrganisationPracticeField entity);
         Task<bool> DeleteAsync(Guid id);
+        Task<IEnumerable<OrganisationPracticeField>> GetOrgFieldsByMajorAsync(Guid majorId);
     }
 }
